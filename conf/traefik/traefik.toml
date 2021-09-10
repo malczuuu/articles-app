@@ -1,0 +1,53 @@
+# Global configuration
+[log]
+  level = "DEBUG"
+
+# Ping definition
+[ping]
+  entryPoint = "metrics"
+
+[metrics]
+  [metrics.prometheus]
+    entryPoint = "metrics"
+
+# Entrypoint definitions
+[entryPoints]
+ [entryPoints.web]
+   address = ":80"
+    [entryPoints.web.forwardedHeaders]
+      insecure = true
+    [entryPoints.web.transport]
+      [entryPoints.web.transport.lifeCycle]
+        requestAcceptGraceTimeout = "10s"
+ [entryPoints.metrics]
+   address = ":8080"
+
+[providers.file]
+  filename = "/etc/traefik/traefik.toml"
+
+
+[http]
+  # Routers definitions
+  [http.routers]
+    [http.routers.keycloak]
+      rule = "Host(`sso.example.com`)"
+      service = "keycloak"
+
+    [http.routers.dbadmin]
+      rule = "Host(`dbadmin.example.com`)"
+      service = "dbadmin"
+
+    [http.routers.mailbox]
+      rule = "Host(`mailbox.example.com`)"
+      service = "mailbox"
+
+  # Services definitions
+  [http.services]
+    [[http.services.keycloak.loadBalancer.servers]]
+      url = "http://keycloak:8080/"
+
+    [[http.services.dbadmin.loadBalancer.servers]]
+      url = "http://phpmyadmin:80/"
+
+    [[http.services.mailbox.loadBalancer.servers]]
+      url = "http://mailhog:8025/"
