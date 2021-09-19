@@ -2,7 +2,7 @@ version: "3"
 services:
 
   gateway-1st:
-    image: traefik:2.4.5
+    image: traefik:2.5.2
     volumes:
       - ./conf/traefik/gateway-1st.toml:/etc/traefik/traefik.toml:ro
     ports:
@@ -44,7 +44,7 @@ services:
       - articles
 
   mariadb:
-    image: mariadb:10.2.6
+    image: mariadb:10.6.4
     environment:
       MYSQL_ROOT_PASSWORD: ingFXT9c8a4ESe01
     volumes:
@@ -55,14 +55,14 @@ services:
       - articles
 
   mailhog:
-    image: mailhog/mailhog:v1.0.0
+    image: mailhog/mailhog:v1.0.1
     networks:
       articles:
         aliases:
           - mailbox.example.com
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:4.8
+    image: phpmyadmin/phpmyadmin:5.1.1
     environment:
       PMA_HOST: mariadb
       PMA_PORT: 3306
@@ -152,7 +152,7 @@ services:
       - articles
 
   gateway-2nd:
-    image: traefik:2.4.5
+    image: traefik:2.5.2
     volumes:
       - ./conf/traefik/gateway-2nd.toml:/etc/traefik/traefik.toml:ro
     depends_on:
