@@ -1,46 +1,23 @@
 version: "3"
 services:
-  mongo:
-    image: mongo:5.0.2
-    ports:
-      - "127.0.0.1:27017:27017"
-    command: [ --replSet, rs0 ]
-    volumes:
-      - mongodb_data:/data/db:rw
-      - ./conf/mongodb/01-replica-set.init.js:/docker-entrypoint-initdb.d/01-replica-set.init.js
-      - ./conf/mongodb/02-collections.init.js:/docker-entrypoint-initdb.d/02-collections.init.js
-    networks:
-      - articles
 
-  mailhog:
-    image: mailhog/mailhog:v1.0.0
+  gateway-1st:
+    image: traefik:2.4.5
+    volumes:
+      - ./conf/traefik/gateway-1st.toml:/etc/traefik/traefik.toml:ro
+    ports:
+      - "127.0.0.1:80:80"
+    depends_on:
+      - keycloak
+      - gatekeeper-shire
+      - gatekeeper-marvel
+      - gatekeeper-galaxy
+      - phpmyadmin
+      - mailhog
     networks:
       articles:
         aliases:
-          - mailbox.example.com
-
-  mariadb:
-    image: mariadb:10.2.6
-    environment:
-      MYSQL_ROOT_PASSWORD: ingFXT9c8a4ESe01
-    volumes:
-      - mariadb_data:/var/lib/mysql/
-      - ./conf/mariadb/01-privileges.init.sql:/docker-entrypoint-initdb.d/01-privileges.init.sql:ro
-      - ./conf/mariadb/02-kc_primary.init.sql:/docker-entrypoint-initdb.d/02-kc_primary.init.sql:ro
-    networks:
-      - articles
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:4.8
-    environment:
-      PMA_HOST: mariadb
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: ingFXT9c8a4ESe01
-    depends_on:
-      - mariadb
-    networks:
-      - articles
+          - sso.example.com
 
   keycloak:
     image: jboss/keycloak:15.0.2
@@ -66,16 +43,35 @@ services:
     networks:
       - articles
 
-  gateway-1st:
-    image: traefik:2.4.5
+  mariadb:
+    image: mariadb:10.2.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ingFXT9c8a4ESe01
     volumes:
-      - ./conf/traefik/gateway-1st.toml:/etc/traefik/traefik.toml:ro
-    ports:
-      - "127.0.0.1:80:80"
+      - mariadb_data:/var/lib/mysql/
+      - ./conf/mariadb/01-privileges.init.sql:/docker-entrypoint-initdb.d/01-privileges.init.sql:ro
+      - ./conf/mariadb/02-kc_primary.init.sql:/docker-entrypoint-initdb.d/02-kc_primary.init.sql:ro
+    networks:
+      - articles
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
     networks:
       articles:
         aliases:
-          - sso.example.com
+          - mailbox.example.com
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:4.8
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ingFXT9c8a4ESe01
+    depends_on:
+      - mariadb
+    networks:
+      - articles
 
   gatekeeper-shire:
     image: quay.io/gogatekeeper/gatekeeper:1.3.5
@@ -98,6 +94,8 @@ services:
       - --enable-token-header=false
       - --skip-access-token-clientid-check
       - --skip-access-token-issuer-check
+    depends_on:
+      - gateway-2nd
     networks:
       - articles
 
@@ -122,6 +120,8 @@ services:
       - --enable-token-header=false
       - --skip-access-token-clientid-check
       - --skip-access-token-issuer-check
+    depends_on:
+      - gateway-2nd
     networks:
       - articles
 
@@ -146,6 +146,8 @@ services:
       - --enable-token-header=false
       - --skip-access-token-clientid-check
       - --skip-access-token-issuer-check
+    depends_on:
+      - gateway-2nd
     networks:
       - articles
 
@@ -153,6 +155,9 @@ services:
     image: traefik:2.4.5
     volumes:
       - ./conf/traefik/gateway-2nd.toml:/etc/traefik/traefik.toml:ro
+    depends_on:
+      - articles-backend
+      - articles-webapp
     networks:
       - articles
 
@@ -165,11 +170,27 @@ services:
       REALM_HEADER: X-Auth-Realm
       USERID_HEADER: X-Auth-Userid
       USERNAME_HEADER: X-Auth-Username
+    depends_on:
+      - mongo
+    networks:
+      - articles
+
+  mongo:
+    image: mongo:5.0.2
+    ports:
+      - "127.0.0.1:27017:27017"
+    command: [ --replSet, rs0 ]
+    volumes:
+      - mongodb_data:/data/db:rw
+      - ./conf/mongodb/01-replica-set.init.js:/docker-entrypoint-initdb.d/01-replica-set.init.js
+      - ./conf/mongodb/02-collections.init.js:/docker-entrypoint-initdb.d/02-collections.init.js
     networks:
       - articles
 
   articles-webapp:
     image: articles-webapp:latest
+    depends_on:
+      - articles-backend
     networks:
       - articles
 
