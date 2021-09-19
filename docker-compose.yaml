@@ -66,16 +66,112 @@ services:
     networks:
       - articles
 
-  traefik:
+  gateway-1st:
     image: traefik:2.4.5
     volumes:
-      - ./conf/traefik/traefik.toml:/etc/traefik/traefik.toml:ro
+      - ./conf/traefik/gateway-1st.toml:/etc/traefik/traefik.toml:ro
     ports:
       - "127.0.0.1:80:80"
     networks:
       articles:
         aliases:
           - sso.example.com
+
+  gatekeeper-shire:
+    image: quay.io/gogatekeeper/gatekeeper:1.3.5
+    expose:
+      - 8080
+    command:
+      - --client-id=articles-webapp
+      - --client-secret=268b08c4-ae72-47ae-8cbb-c0f00f2e6691
+      - --discovery-url=http://sso.example.com/auth/realms/shire
+      - --encryption-key=kaT0iWJO8HXfscM0HdE2izOsp8kQfYhJ
+      - --enable-refresh-tokens=true
+      - --secure-cookie=false
+      - --listen=:8080
+      - --upstream-url=http://gateway-2nd:8080
+      - --upstream-response-header-timeout=30s
+      - --resources=uri=/*
+      - --headers=X-Auth-Realm=shire
+      - --enable-authorization-header=false
+      - --enable-authorization-cookies=false
+      - --enable-token-header=false
+      - --skip-access-token-clientid-check
+      - --skip-access-token-issuer-check
+    networks:
+      - articles
+
+  gatekeeper-marvel:
+    image: quay.io/gogatekeeper/gatekeeper:1.3.5
+    expose:
+      - 8080
+    command:
+      - --client-id=articles-webapp
+      - --client-secret=67487ed3-1dec-4698-a84f-63bf28e8f9f1
+      - --discovery-url=http://sso.example.com/auth/realms/marvel
+      - --encryption-key=CXhznKiFxxMnb4xwpl8D7NcHyv7aTMNf
+      - --enable-refresh-tokens=true
+      - --secure-cookie=false
+      - --listen=:8080
+      - --upstream-url=http://gateway-2nd:8080
+      - --upstream-response-header-timeout=30s
+      - --resources=uri=/*
+      - --headers=X-Auth-Realm=marvel
+      - --enable-authorization-header=false
+      - --enable-authorization-cookies=false
+      - --enable-token-header=false
+      - --skip-access-token-clientid-check
+      - --skip-access-token-issuer-check
+    networks:
+      - articles
+
+  gatekeeper-galaxy:
+    image: quay.io/gogatekeeper/gatekeeper:1.3.5
+    expose:
+      - 8080
+    command:
+      - --client-id=articles-webapp
+      - --client-secret=3035dff0-a8ff-449d-8f7c-34d13febcc14
+      - --discovery-url=http://sso.example.com/auth/realms/galaxy
+      - --encryption-key=cPr87HosONcDgumXOD8E0WmE6mueYh4Y
+      - --enable-refresh-tokens=true
+      - --secure-cookie=false
+      - --listen=:8080
+      - --upstream-url=http://gateway-2nd:8080
+      - --upstream-response-header-timeout=30s
+      - --resources=uri=/*
+      - --headers=X-Auth-Realm=galaxy
+      - --enable-authorization-header=false
+      - --enable-authorization-cookies=false
+      - --enable-token-header=false
+      - --skip-access-token-clientid-check
+      - --skip-access-token-issuer-check
+    networks:
+      - articles
+
+  gateway-2nd:
+    image: traefik:2.4.5
+    volumes:
+      - ./conf/traefik/gateway-2nd.toml:/etc/traefik/traefik.toml:ro
+    networks:
+      - articles
+
+  articles-backend:
+    image: articles-backend:latest
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017
+      SPRING_DATA_MONGODB_DATABASE: articles
+      ANONYMOUS_ALLOWED: "false"
+      REALM_HEADER: X-Auth-Realm
+      USERID_HEADER: X-Auth-Userid
+      USERNAME_HEADER: X-Auth-Username
+    networks:
+      - articles
+
+  articles-webapp:
+    image: articles-webapp:latest
+    networks:
+      - articles
 
 volumes:
   mongodb_data:

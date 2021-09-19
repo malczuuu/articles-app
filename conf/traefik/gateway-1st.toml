@@ -33,6 +33,18 @@
       rule = "Host(`sso.example.com`)"
       service = "keycloak"
 
+    [http.routers.gatekeeper-shire]
+      rule = "Host(`shire.articles.example.com`)"
+      service = "gatekeeper-shire"
+
+    [http.routers.gatekeeper-marvel]
+      rule = "Host(`marvel.articles.example.com`)"
+      service = "gatekeeper-marvel"
+
+    [http.routers.gatekeeper-galaxy]
+      rule = "Host(`galaxy.articles.example.com`)"
+      service = "gatekeeper-galaxy"
+
     [http.routers.dbadmin]
       rule = "Host(`dbadmin.example.com`)"
       service = "dbadmin"
@@ -45,6 +57,15 @@
   [http.services]
     [[http.services.keycloak.loadBalancer.servers]]
       url = "http://keycloak:8080/"
+
+    [[http.services.gatekeeper-shire.loadBalancer.servers]]
+      url = "http://gatekeeper-shire:8080/"
+
+    [[http.services.gatekeeper-marvel.loadBalancer.servers]]
+      url = "http://gatekeeper-marvel:8080/"
+
+    [[http.services.gatekeeper-galaxy.loadBalancer.servers]]
+      url = "http://gatekeeper-galaxy:8080/"
 
     [[http.services.dbadmin.loadBalancer.servers]]
       url = "http://phpmyadmin:80/"

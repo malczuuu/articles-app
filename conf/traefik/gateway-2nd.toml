@@ -1,0 +1,46 @@
+# Global configuration
+[log]
+  level = "DEBUG"
+
+# Ping definition
+[ping]
+  entryPoint = "metrics"
+
+[metrics]
+  [metrics.prometheus]
+    entryPoint = "metrics"
+
+# Entrypoint definitions
+[entryPoints]
+ [entryPoints.web]
+   address = ":80"
+    [entryPoints.web.forwardedHeaders]
+      insecure = true
+    [entryPoints.web.transport]
+      [entryPoints.web.transport.lifeCycle]
+        requestAcceptGraceTimeout = "10s"
+ [entryPoints.metrics]
+   address = ":8080"
+
+[providers.file]
+  filename = "/etc/traefik/traefik.toml"
+
+
+[http]
+  # Routers definitions
+  [http.routers]
+    [http.routers.articles-backend]
+      rule = "PathPrefix(`/api`)"
+      service = "articles-backend"
+
+    [http.routers.articles-webapp]
+      rule = "PathPrefix(`/`)"
+      service = "articles-webapp"
+
+  # Services definitions
+  [http.services]
+    [[http.services.articles-backend.loadBalancer.servers]]
+      url = "http://articles-backend:8080/"
+
+    [[http.services.articles-webapp.loadBalancer.servers]]
+      url = "http://articles-webapp:80/"
