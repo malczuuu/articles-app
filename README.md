@@ -77,9 +77,9 @@ proper HTTP service should be accessed.
 
 ## Project repositories
 
+* [`articles-app`][articles-app], which holds Docker environment setup.
 * [`articles-backend`][articles-backend], which holds backend application.
 * [`articles-webapp`][articles-webapp], which holds frontend application.
-* [`articles-setup`][articles-setup], which holds Docker environment setup.
 
 ## Trivia
 
@@ -113,4 +113,4 @@ proper HTTP service should be accessed.
 
 [articles-webapp]: https://github.com/malczuuu/articles-webapp
 
-[articles-setup]: https://github.com/malczuuu/articles-setup
+[articles-app]: https://github.com/malczuuu/articles-app
