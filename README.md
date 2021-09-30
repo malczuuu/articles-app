@@ -1,6 +1,8 @@
-# Articles Setup
+# Articles App
 
-Setup of a simple application for exploring multi-tenancy concepts.
+A simple application for exploring multi-tenancy concepts. This repository serves the purpose of
+setup and configuration. See [Project repositories](#project-repositories) chapter for links to
+implementation repositories.
 
 Contains a full environment setup for three tenant environments, accessible by different domains,
 secured by respective Keycloak realms.
